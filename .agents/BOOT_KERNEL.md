@@ -22,7 +22,9 @@
 ---
 
 ## ⚙️ Protocolo de Reinicialização Rápida (Zero-to-One Boot)
-Sempre que uma nova sessão do Antigravity 2.0 for iniciada neste repositório:
-1. O Orquestrador carrega este manifesto e executa a auto-descoberta dos agentes.
-2. O auto-diagnóstico checa a disponibilidade das ferramentas MCP (`supabase`, `insomnia`, `TestSprite`).
-3. O ecossistema assume imediatamente o modo `execution_mode: subagents` em `.prisma/state.json`.
+**GATILHO DE ATIVAÇÃO IMEDIATA (ZERO-WAIT EXECUTION):**
+Sempre que uma nova sessão do Antigravity 2.0 for iniciada e o usuário digitar `iniciar modo prisma`, `ativar modo prisma` ou similar:
+1. **É PROIBIDO APENAS RESPONDER EM TEXTO:** Não prometa que os agentes serão ativados no futuro ou ao criar arquivos. Isso é falha de execução.
+2. **EXECUTE `define_subagent` IMEDIATAMENTE:** O Orquestrador DEVE chamar a ferramenta `define_subagent` para registrar cada um dos 9 agentes da tabela acima ANTES de concluir a resposta ao usuário.
+3. **ATUALIZE O ESTADO:** O auto-diagnóstico checa a disponibilidade das ferramentas MCP (`supabase`, `insomnia`, `TestSprite`) e grava `"execution_mode": "subagents"` no arquivo `.prisma/state.json`.
+4. **CONFIRME A ATIVAÇÃO REAL:** Apresente o relatório ao usuário confirmando que os 9 subagentes foram efetivamente registrados na memória operacional do IDE.
