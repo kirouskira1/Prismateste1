@@ -1,16 +1,13 @@
 {
-  "session_id": null,
-  "execution_mode": null,
-  "detected_at": null,
-  "project": null,
+  "session_id": "7c61eb37-bf41-4f23-a889-4d0b94af5b8a",
+  "execution_mode": "subagents",
+  "detected_at": "2026-07-01T21:18:30Z",
+  "project": "Prisma V4.5 OS",
   "compilation_target": "V4",
-
   "sprint_progress": {},
-
   "current_phase": 0,
-  "current_sprint": null,
-  "sprint_status": "not_started",
-
+  "current_sprint": "Kernel_Boot",
+  "sprint_status": "in_progress",
   "trm_loop": {
     "active_task_id": null,
     "iteration_count": 0,
@@ -18,12 +15,8 @@
     "fresh_eyes_used": false,
     "fresh_eyes_bonus_granted": false
   },
-
-  "active_hat": null,
-
+  "active_hat": "ORCHESTRATOR",
   "completed_files": [],
-
   "next_task": null,
-
-  "supabase": null
+  "supabase": "connected"
 }
