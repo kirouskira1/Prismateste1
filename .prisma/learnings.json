@@ -1,0 +1,27 @@
+{
+  "evolutionary_memory": {
+    "version": "4.2",
+    "root_cause_shifts": [],
+    "common_violations": [
+      {
+        "rule": "Supabase SSR requires cookies setAll inside Next.js Middleware",
+        "count": 1,
+        "last_seen": "2026-06-26T18:40:34Z",
+        "mitigation": "Sempre utilizar o boilerplate do @supabase/ssr com tratamento de Server-Side Cookies na request e response. Nunca usar localStorage em ambientes server-only."
+      },
+      {
+        "rule": "No console.log inside Next.js Server Components",
+        "count": 1,
+        "last_seen": "2026-06-26T18:37:07Z",
+        "mitigation": "Componentes de servidor poluem stdout. Auditor reprovou o AuthBadge.tsx."
+      }
+    ],
+    "agent_stats": {
+      "Worker_TRM": {
+        "tasks_completed": 1,
+        "avg_iterations": 1,
+        "first_pass_rate": 0.0
+      }
+    }
+  }
+}

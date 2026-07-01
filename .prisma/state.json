@@ -1,0 +1,29 @@
+{
+  "session_id": null,
+  "execution_mode": null,
+  "detected_at": null,
+  "project": null,
+  "compilation_target": "V4",
+
+  "sprint_progress": {},
+
+  "current_phase": 0,
+  "current_sprint": null,
+  "sprint_status": "not_started",
+
+  "trm_loop": {
+    "active_task_id": null,
+    "iteration_count": 0,
+    "max_attempts": 3,
+    "fresh_eyes_used": false,
+    "fresh_eyes_bonus_granted": false
+  },
+
+  "active_hat": null,
+
+  "completed_files": [],
+
+  "next_task": null,
+
+  "supabase": null
+}
