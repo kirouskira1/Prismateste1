@@ -1,8 +1,8 @@
-# Audit and Quality Framework — Prisma V4
+# Audit and Quality Framework — Prisma V5.0
 
 **Classification:** REFERENCE  
 **Codename:** `Audit_Framework`  
-**Version:** V4.5 (Loop Architecture + Fable Patterns)  
+**Version:** V5.0 (Loop Architecture + Fable Patterns)  
 **Context Layer:** Task (Every Audit Cycle)  
 
 ---
@@ -55,6 +55,7 @@ This document is the "Supreme Law" of Prisma. The TRM Cognitive Agent **MUST** u
 - [ ] **Modularity:** Does the code follow the single responsibility principle? (UI components separated from Agent logic).
 - [ ] **Contract Compliance:** Do all Server Actions have `"use server"` on line 1 and return `ActionResponse<T>`?
 - [ ] **Anti-Legacy Filter:** No Prisma ORM, no Pages Router, no `/api/` routes, no direct `fetch()` to Edge Functions?
+- [ ] **Lint & Format (V5.0):** Does the code pass ESLint without errors and comply with Prettier formatting? (Run `npm run lint` if in doubt).
 
 ---
 
@@ -85,13 +86,13 @@ Weights (when NO dynamic rubric is provided — legacy V4.2):
   Code Quality:     15%
   Data Contract:    10%
 
-Weights (when dynamic rubric IS provided — V4.3):
+Weights (when dynamic rubric IS provided):
   Architecture V4:  27%
   Security:         23%
   Frontend/Design:  18%
   Code Quality:     12%
   Data Contract:    10%
-  Dynamic Rubric:   10%   ← NEW (V4.3)
+  Dynamic Rubric:   10%   ← NEW
 
 Threshold: score >= 9.5 → APPROVED
            score <  9.5 → REJECTED + feedback
@@ -99,7 +100,7 @@ Threshold: score >= 9.5 → APPROVED
 
 ---
 
-## 6. Dynamic Rubric Integration (V4.3 — Loop Architecture)
+## 6. Dynamic Rubric Integration (Loop Architecture)
 
 When the Architect provides a `<task_rubric>` for a task, the Auditor MUST evaluate code against both the static framework (Sections 1-5) and the dynamic rubric criteria.
 
@@ -146,4 +147,4 @@ If after maximum attempts (configurable via `prisma.config.json`, default: 3) th
 
 ---
 
-*Framework generated under Prisma V4.3 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Framework generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

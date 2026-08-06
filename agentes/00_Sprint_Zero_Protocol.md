@@ -4,7 +4,7 @@
 **Codename:** `Sprint_Zero`  
 **Executor:** All agents operate under `Architect_TRM` orchestration  
 **Trigger:** Activated by **"Prisma Solo Mode"** command + Client Briefing  
-**Version:** V4.5 (Loop Architecture + Fable Patterns)  
+**Version:** V5.0 (Loop Architecture + Fable Patterns)  
 
 ---
 
@@ -51,7 +51,7 @@ Sprint Zero is the **architectural blueprint of the building**. No bricklayer (W
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                  PRISMA V4.1 LIFECYCLE                    │
+│                  PRISMA V5.0 LIFECYCLE                    │
 │                                                          │
 │  ┌────────────┐                                          │
 │  │  BRIEFING  │  Client input (description or Stitch)    │
@@ -545,7 +545,13 @@ RULE: One artifact at a time. Same protocol as code.
 2. Execute TRM verification of Artifact N
 3. Declare: "Artifact N of Sprint Zero complete.
    Audit Gateway approved."
-4. Await command: "Proceed."
+4. Smart Pause (consistent with Kernel §4 <smart_pause> and 00_Execution_Playbook.md's
+   Audit Gateways — do NOT blanket-pause after every artifact, that contradicts the
+   Kernel's general autonomy rule):
+     ├── TRM verification found a genuine ❌ or a briefing gap that needs human
+     │   clarification → PAUSE, ask the specific question, wait for a real answer.
+     └── TRM verification passed clean → PROCEED automatically to Artifact N+1.
+           Report progress (§10 of 00_Orchestrator_Protocol.md) without stopping.
 5. Generate Artifact N+1
 ```
 
@@ -614,4 +620,19 @@ You have ample context remaining. Do not stop, summarize, or suggest a new sessi
 
 ---
 
-*Protocol generated under Prisma V4.5 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+## 🔗 Graph Topology
+### Agentes Envolvidos
+- [[01_Architect_Agent]] — Domain Analysis, Implementation Plan
+- [[05_Backend_Agent]] — SQL Script, API Contract, Zod Schemas
+- [[03_Auditor_Agent]] — Gherkin Scenarios, Validation Report
+- [[07_Security_Agent]] — Monitoring, RLS
+### Docs de Referência
+- [[000_Kernel_System_Override]]
+- [[00_Execution_Playbook]]
+- [[01_Whitepaper_Architecture]]
+- [[00_Prisma_Concepts_DeepDive]]
+- [[15_Architectural_Decision_Framework]]
+
+---
+
+*Protocol generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

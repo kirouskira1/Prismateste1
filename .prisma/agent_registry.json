@@ -1,106 +1,197 @@
 {
-  "version": "4.4",
-  "description": "Prisma V4.4 Agent Auto-Discovery Registry",
+  "version": "5.0",
+  "description": "Prisma V5.0 Agent Auto-Discovery Registry",
+  "compatibility_matrix": "docs/27_Tool_Compatibility_Matrix.md",
+  "tool_environments": ["antigravity", "claude_code"],
   "agents": [
     {
+      "type": "agent",
       "codename": "ORCHESTRATOR",
       "spec_file": "agentes/00_Orchestrator_Protocol.md",
       "factory": "CORE",
-      "tools": ["invoke_subagent", "view_file", "write_to_file", "run_command"],
+      "tools": {
+        "canonical": ["spawn_agent", "read_file", "write_file", "run_shell"],
+        "antigravity": ["invoke_subagent", "view_file", "write_to_file", "run_command"],
+        "claude_code": ["Agent", "Read", "Write", "Bash"]
+      },
       "tool_mode": "READ_WRITE",
       "capabilities": ["task_routing", "agent_dispatch", "anti_collapse_enforcement", "session_management"],
       "can_spawn": true,
-      "is_root": true
+      "is_root": true,
+      "root_type": "session_root",
+      "never_sees": []
     },
     {
+      "type": "agent",
       "codename": "ARCHITECT_TRM",
       "spec_file": "agentes/01_Architect_Agent.md",
       "factory": "CROSS_CUT",
-      "tools": ["view_file", "grep_search", "write_to_file", "run_command"],
+      "tools": {
+        "canonical": ["read_file", "search_code", "write_file", "run_shell"],
+        "antigravity": ["view_file", "grep_search", "write_to_file", "run_command"],
+        "claude_code": ["Read", "Grep", "Write", "Bash"]
+      },
       "tool_mode": "READ_WRITE",
       "capabilities": ["task_decomposition", "rubric_generation", "triage"],
       "can_spawn": true,
-      "is_root": true
+      "is_root": true,
+      "root_type": "dispatch_tree_root",
+      "invoked_by": "ORCHESTRATOR",
+      "never_sees": ["Worker reasoning_trace (during audit phase)"]
     },
     {
+      "type": "agent",
       "codename": "TRM_WORKER",
       "spec_file": "agentes/02_Worker_TRM_Agent.md",
       "factory": "FACTORY_1|FACTORY_2",
-      "tools": ["view_file", "grep_search", "write_to_file", "replace_file_content", "run_command"],
+      "tools": {
+        "canonical": ["read_file", "search_code", "write_file", "edit_file", "run_shell"],
+        "antigravity": ["view_file", "grep_search", "write_to_file", "replace_file_content", "run_command"],
+        "claude_code": ["Read", "Grep", "Write", "Edit", "Bash"]
+      },
       "tool_mode": "READ_WRITE",
       "capabilities": ["code_generation", "self_check"],
       "can_spawn": false,
+      "is_root": false,
       "never_sees": ["04_Audit_Framework.md", "03_Auditor_Agent.md", "task_specific_rubric", "reasoning_trace from previous iterations"]
     },
     {
+      "type": "agent",
       "codename": "AUDITOR_TRM",
       "spec_file": "agentes/03_Auditor_Agent.md",
       "factory": "CROSS_CUT",
-      "tools": ["view_file", "grep_search"],
+      "tools": {
+        "canonical": ["read_file", "search_code"],
+        "antigravity": ["view_file", "grep_search"],
+        "claude_code": ["Read", "Grep"]
+      },
       "tool_mode": "READ_ONLY",
       "capabilities": ["code_judgment", "scoring", "dual_dimension_audit"],
       "can_spawn": false,
-      "never_sees": ["reasoning_trace from worker"]
+      "is_root": false,
+      "isolation_critical": true,
+      "claude_code_dispatch": "agent_tool_spawn",
+      "never_sees": ["02_Worker_TRM_Agent.md", "reasoning_trace", "10_Implementation_Plan.md", "03_MCP_Component_Registry.md", "learnings.json"]
     },
     {
+      "type": "agent",
       "codename": "DESIGN_AGENT",
       "spec_file": "agentes/04_Design_Agent.md",
       "factory": "FACTORY_1",
-      "tools": ["view_file", "grep_search", "write_to_file"],
+      "tools": {
+        "canonical": ["read_file", "search_code", "write_file"],
+        "antigravity": ["view_file", "grep_search", "write_to_file"],
+        "claude_code": ["Read", "Grep", "Write"]
+      },
       "tool_mode": "READ_WRITE",
       "capabilities": ["ui_ux_engineering", "mcp_component_mapping", "visual_fidelity"],
       "can_spawn": false,
-      "never_sees": ["02_Initial_Schema_V4.sql", "Backend action files"]
+      "is_root": false,
+      "never_sees": ["02_Initial_Schema_V4.sql", "Backend action files", "Worker reasoning_trace"]
     },
     {
+      "type": "agent",
       "codename": "BACKEND_AGENT",
       "spec_file": "agentes/05_Backend_Agent.md",
       "factory": "FACTORY_2",
-      "tools": ["view_file", "grep_search", "write_to_file", "replace_file_content", "run_command"],
+      "tools": {
+        "canonical": ["read_file", "search_code", "write_file", "edit_file", "run_shell"],
+        "antigravity": ["view_file", "grep_search", "write_to_file", "replace_file_content", "run_command"],
+        "claude_code": ["Read", "Grep", "Write", "Edit", "Bash"]
+      },
       "tool_mode": "READ_WRITE",
       "capabilities": ["server_actions", "business_logic", "policy_delegation"],
       "can_spawn": false,
+      "is_root": false,
       "never_sees": ["03_MCP_Component_Registry.md", "Stitch HTML", "Design files"]
     },
     {
+      "type": "agent",
       "codename": "POLICY_AGENT",
       "spec_file": "agentes/06_Policy_Agent.md",
       "factory": "FACTORY_2",
-      "tools": ["view_file"],
+      "tools": {
+        "canonical": ["read_file"],
+        "antigravity": ["view_file"],
+        "claude_code": ["Read"]
+      },
       "tool_mode": "READ_ONLY",
       "capabilities": ["business_governance", "zero_hard_code", "rag_consultation"],
       "can_spawn": false,
+      "is_root": false,
       "never_sees": ["02_Initial_Schema_V4.sql", "03_MCP_Component_Registry.md", "Worker reasoning_trace"]
     },
     {
+      "type": "agent",
       "codename": "SECURITY_AGENT",
       "spec_file": "agentes/07_Security_Agent.md",
       "factory": "CROSS_CUT",
-      "tools": ["view_file", "grep_search"],
+      "tools": {
+        "canonical": ["read_file", "search_code"],
+        "antigravity": ["view_file", "grep_search"],
+        "claude_code": ["Read", "Grep"]
+      },
       "tool_mode": "READ_ONLY",
       "capabilities": ["prompt_injection_detection", "rls_validation", "ip_protection", "engineering_baseline"],
       "can_spawn": false,
+      "is_root": false,
+      "isolation_critical": true,
+      "claude_code_dispatch": "agent_tool_spawn",
       "never_sees": ["03_MCP_Component_Registry.md", "Stitch HTML", "Design files", "Worker reasoning_trace"]
     },
     {
+      "type": "agent",
       "codename": "WATCHER_AGENT",
       "spec_file": "agentes/08_Watcher_Agent.md",
       "factory": "CROSS_CUT",
-      "tools": ["view_file", "grep_search", "run_command"],
+      "tools": {
+        "canonical": ["read_file", "search_code", "run_shell"],
+        "antigravity": ["view_file", "grep_search", "run_command"],
+        "claude_code": ["Read", "Grep", "Bash"]
+      },
       "tool_mode": "READ_ONLY",
+      "tool_mode_note": "run_shell/Bash is scoped exclusively to read-only SQL SELECT queries against the audit views (v_agent_audit_summary, v_active_sprint_health) — never writes, never DDL/DML. See agentes/00_Orchestrator_Protocol.md §5.1.",
       "capabilities": ["autonomous_monitoring", "anomaly_detection", "incident_briefing", "telemetry_ingestion"],
       "can_spawn": false,
+      "is_root": false,
+      "isolation_critical": true,
+      "claude_code_dispatch": "agent_tool_spawn",
       "never_sees": ["reasoning_trace", "code_draft", "02_Worker_TRM_Agent.md", "03_Auditor_Agent.md"]
     },
     {
+      "type": "agent",
       "codename": "SCOUT_AGENT",
       "spec_file": "agentes/09_Scout_Agent.md",
       "factory": "CROSS_CUT",
-      "tools": ["search_web", "read_url_content", "view_file"],
+      "tools": {
+        "canonical": ["web_search", "fetch_url", "read_file"],
+        "antigravity": ["search_web", "read_url_content", "view_file"],
+        "claude_code": ["WebSearch", "WebFetch", "Read"]
+      },
       "tool_mode": "READ_ONLY",
       "capabilities": ["research", "intelligence_gathering", "fact_checking"],
       "can_spawn": false,
-      "never_sees": ["reasoning_trace", "code_draft", "04_Audit_Framework.md", "task_specific_rubric", "state.json"]
+      "is_root": false,
+      "isolation_critical": true,
+      "claude_code_dispatch": "agent_tool_spawn",
+      "never_sees": ["reasoning_trace", "code_draft", "04_Audit_Framework.md", "task_specific_rubric", ".prisma/state.json"]
+    },
+    {
+      "type": "protocol",
+      "codename": "SPRINT_ZERO",
+      "spec_file": "agentes/00_Sprint_Zero_Protocol.md",
+      "factory": "CROSS_CUT",
+      "tools": {
+        "canonical": [],
+        "antigravity": [],
+        "claude_code": []
+      },
+      "tool_mode": "N/A",
+      "note": "Not an independently dispatchable agent — a sequenced protocol that ARCHITECT_TRM follows, delegating each of its 8 artifacts to already-registered agents (ARCHITECT_TRM, BACKEND_AGENT, AUDITOR_TRM, SECURITY_AGENT). Registered here as type:\"protocol\" so Agent Discovery (Orchestrator §5.3) can resolve a lookup for \"Sprint_Zero\" without rejecting it, while keeping it distinct from the 9 real agents.",
+      "capabilities": ["document_generation_sequencing"],
+      "can_spawn": false,
+      "is_root": false,
+      "never_sees": ["04_Audit_Framework.md (loaded only during its own audit phase)", "Worker reasoning_trace"]
     }
   ]
 }

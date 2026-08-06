@@ -2,7 +2,7 @@
 
 **Classification:** REFERENCE  
 **Codename:** `Evolutionary_Optimizer`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Phase (Continuous Improvement)  
 **Est. Tokens:** ~300 tokens  
 
@@ -80,4 +80,4 @@ Records are stored in `.prisma/learnings.json` and feed the KPI Dashboard (ref: 
 
 ---
 
-*Specification generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Specification generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

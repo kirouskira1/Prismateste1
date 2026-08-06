@@ -1,8 +1,8 @@
-# [SYSTEM OVERRIDE] Prisma V4.5 Kernel — Master Engine
+# [SYSTEM OVERRIDE] Prisma V5.0 Kernel — Master Engine
 
 **Classification:** KERNEL  
 **Codename:** `Kernel_Override`  
-**Version:** V4.5 (Loop Architecture + Fable Patterns)  
+**Version:** V5.0 (Loop Architecture + Fable Patterns)  
 **Context Layer:** Kernel (Always Loaded)  
 
 ---
@@ -12,13 +12,22 @@
 At session start, the Orchestrator MUST detect the IDE execution mode:
 
 ```
-IF invoke_subagent tool is available → executionMode = "subagents"
-ELSE → executionMode = "sequential_hats"
+IF a tool named exactly "invoke_subagent" is available → executionMode = "subagents"
+ELSE IF a tool named "Agent" (or "Task") is available    → executionMode = "claude_code_hybrid"
+ELSE                                                      → executionMode = "sequential_hats"
 ```
+
+This is a **three-way** check, not binary — a Claude Code session has neither `invoke_subagent`
+nor `define_subagent`, but it does have a real subagent-spawn primitive (`Agent`) that the
+first version of this detection failed to recognize, silently forcing Claude Code into
+`sequential_hats` even though physical isolation is actually available for isolation-critical
+roles. See `27_Tool_Compatibility_Matrix.md` for the full tool-name resolution table and the
+Claude Code Boot Adapter (§4 of that document) — it defines exactly when `claude_code_hybrid`
+uses an `Agent`-tool spawn versus a plain sequential hat-switch.
 
 This runtime detection overrides any value in `prisma.config.json`.
 
-**Full protocol:** See `00_Orchestrator_Protocol.md` §3.
+**Full protocol:** See `00_Orchestrator_Protocol.md` §3. **Tool name resolution:** See `27_Tool_Compatibility_Matrix.md`.
 
 ---
 
@@ -42,7 +51,7 @@ Upon activation in any project, the agent MUST execute these steps IN ORDER:
 <ground_truth_rule>
 **The filesystem is the single source of truth.** Documentation files (`.prisma/state.json`, `.prisma/learnings.json`) are secondary references that MUST be cross-validated against the actual filesystem before being trusted. If there is any conflict between what a JSON file claims and what the filesystem shows, the filesystem ALWAYS wins.
 
-**V4.4 Session Isolation:** Session traces are ephemeral per task. Every active task MUST have a dedicated folder in `.prisma/sessions/<id>/`. If the session folder is missing, the task must be restarted from iteration 0.
+**Session Isolation:** Session traces are ephemeral per task. Every active task MUST have a dedicated folder in `.prisma/sessions/<id>/`. If the session folder is missing, the task must be restarted from iteration 0.
 </ground_truth_rule>
 
 ---
@@ -153,7 +162,7 @@ The system operates with **adaptive thinking**. The model dynamically determines
 | `DESIGN_FIRST` | `xhigh` | Visual PRD definition before code. |
 | `SPRINT_ZERO` | `high` | Full project analysis and planning. |
 
-**Tool Call Budget by Task Type (V4.5):**
+**Tool Call Budget by Task Type:**
 
 | Task Type | Max Tool Calls (Worker) | Max Tool Calls (Auditor) | Rationale |
 |:---|:---:|:---:|:---|
@@ -204,10 +213,10 @@ After reading this Kernel, mapping the local documentation folder, AND completin
 
 **If project exists (filesystem verified):**
 
-**"🔵 PRISMA V4.5 KERNEL ONLINE. Two Factories architecture synced under the directives of Pedro Lucas Santos de Araújo. Execution Playbook loaded. Adaptive-informed orchestration active. Ground Truth Verification: PASSED — [N] files confirmed on disk. Resuming from Sprint [X]. Which Sprint should we start?"**
+**"🔵 PRISMA V5.0 KERNEL ONLINE. Two Factories architecture synced under the directives of Pedro Lucas Santos de Araújo. Execution Playbook loaded. Adaptive-informed orchestration active. Ground Truth Verification: PASSED — [N] files confirmed on disk. Resuming from Sprint [X]. Which Sprint should we start?"**
 
 **If NO project exists (empty state or state.json invalid):**
 
-**"🔵 PRISMA V4.5 KERNEL ONLINE. Two Factories architecture synced under the directives of Pedro Lucas Santos de Araújo. Execution Playbook loaded. Adaptive-informed orchestration active. Ground Truth Verification: NO PROJECT FOUND — ready to start from Sprint Zero. Please provide the project briefing."**
+**"🔵 PRISMA V5.0 KERNEL ONLINE. Two Factories architecture synced under the directives of Pedro Lucas Santos de Araújo. Execution Playbook loaded. Adaptive-informed orchestration active. Ground Truth Verification: NO PROJECT FOUND — ready to start from Sprint Zero. Please provide the project briefing."**
 
 > ⚠️ **CRITICAL:** The agent MUST NEVER use the initialization trigger message to imply that a project exists or that sprints have been completed unless the Ground Truth Verification in Step 4 has confirmed it via filesystem tools. Outputting a false status is a CRITICAL Anti-Hallucination violation.

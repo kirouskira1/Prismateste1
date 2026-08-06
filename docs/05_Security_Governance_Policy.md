@@ -2,7 +2,7 @@
 
 **Classification:** REFERENCE  
 **Codename:** `Security_Constitution`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Task (Security Review)  
 **Est. Tokens:** ~1,200 tokens  
 
@@ -50,7 +50,11 @@ CREATE POLICY "Users can view own records" ON public.[table_name]
 
 ## 3. Forbidden Patterns (Anti-Legacy)
 
-The following patterns are **expressly prohibited** in any Prisma V4 project:
+The following patterns are **expressly prohibited** in any Prisma-built project. Most of these
+(rows 1-4, 6) are the universal Anti-Legacy Filter (`000_Kernel_System_Override.md` §3) — they
+apply regardless of `compilation_target`. Only "Hard-coded business rules" is specific to the
+`V4`/`HYBRID` compilation targets (see `05_Backend_Agent.md` §3 — `V3.1` mode permits simple
+stable rules directly in code):
 
 | Pattern | Why Forbidden | Required Alternative |
 |:---|:---|:---|
@@ -148,4 +152,4 @@ The Auditor and Security agents operate in **READ-ONLY** mode. They NEVER write 
 
 ---
 
-*Security Constitution — Prisma V4 — Lead Architect Pedro Lucas Santos de Araújo*
+*Security Constitution — Prisma V5.0 — Lead Architect Pedro Lucas Santos de Araújo*

@@ -2,7 +2,7 @@
 
 **Classification:** REFERENCE  
 **Codename:** `Factory_KPIs`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Always (Performance Monitoring)  
 **Est. Tokens:** ~300 tokens  
 
@@ -63,4 +63,4 @@ interface AuditMetricsLog {
 
 ---
 
-*KPI specification generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*KPI specification generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

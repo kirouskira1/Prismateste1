@@ -1,8 +1,8 @@
-# Execution Playbook — Prisma V4
+# Execution Playbook — Prisma V5.0
 
 **Classification:** REFERENCE  
 **Codename:** `Execution_Playbook`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Always (Execution Order)  
 **Est. Tokens:** ~600 tokens  
 
@@ -79,12 +79,16 @@ This document governs the construction pipeline. The coding AI must execute the 
 
 ## GENERATION PROTOCOL (THE AI'S ABSOLUTE RULE)
 
-During execution of any Sprint above, you (the Coding AI) are **prohibited** from responding with more than one code file.
+During execution of any Sprint above, you (the Coding AI) are **prohibited** from responding with more than one code file (Single-Artifact Cadence).
 
 1. Generate the exact Sprint file.
 2. Say: *"Sprint X.Y complete. Audit Gateway approved."*
-3. Stop and await the command: *"Proceed."*
+3. Smart Pause — same rule as every Audit Gateway above, not a stricter one: if the gateway
+   passed clean, proceed automatically to the next Sprint. Stop and await *"Proceed"* only on a
+   critical gateway failure or a genuinely irreversible/ambiguous decision. (This step used to say
+   "Stop and await the command: 'Proceed'" unconditionally, contradicting every Gateway note above
+   it — fixed for consistency, `docs/26_Version_Unification_Plan.md` Rodada 2, G4.)
 
 ---
 
-*Playbook generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Playbook generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

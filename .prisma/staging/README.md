@@ -1,4 +1,4 @@
-# 🚧 Staging & Experimentation Sandbox — Prisma V4.5
+# 🚧 Staging & Experimentation Sandbox — Prisma V5.0
 
 **Classification:** SAFE SANDBOX  
 **Purpose:** Isolate new scripts, experimental skills, and agent modifications before canonical promotion.

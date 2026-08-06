@@ -1,8 +1,8 @@
-# Prompt Implementation Plan V4 (TRM Execution Guide)
+# Prompt Implementation Plan V5.0 (TRM Execution Guide)
 
 **Classification:** REFERENCE  
 **Codename:** `Implementation_Plan`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Task (Reasoning Prompts)  
 **Est. Tokens:** ~800 tokens  
 
@@ -87,4 +87,4 @@ For each task below, start your reasoning loop (`z`) with the indicated prompt. 
 
 ---
 
-*Implementation plan generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Implementation plan generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

@@ -1,7 +1,9 @@
--- ARQUIVO: docs/02_Initial_Schema_V4.sql
+-- ARQUIVO: schemas/02_Initial_Schema_V4.sql
 -- DESCRIÇÃO: Schema completo do banco de dados Prisma AI (V4 Hybrid Architecture)
 -- Inclui suporte para Gerador de SaaS (V3), Plataforma de Governança (V4) e Telemetria V4.4.
--- VERSÃO: 4.4 (Loop Architecture - Telemetry Enabled)
+-- VERSAO DO KERNEL: 5.0 (este arquivo continua com o nome/rotulo "V4" pois designa o
+-- compilation_target arquitetural "V4 = Governanca/Hybrid" (ver docs/15_Architectural_Decision_Framework.md),
+-- que e independente da versao do Kernel Prisma. Nao renomear para "V5" — esse target nao existe.
 
 -- ============================================================================
 -- 1. HABILITAR EXTENSÕES
@@ -109,6 +111,37 @@ create table public.audit_logs (
 );
 comment on table public.audit_logs is 'Logs de auditoria com rastreamento completo';
 comment on column public.audit_logs.citation_metadata is 'Metadados de citação (arquivo, página, snippet)';
+
+-- ============================================================================
+-- 4.B VECTOR INTELLIGENCE & RAG PIPELINE (V5.0)
+-- ============================================================================
+
+-- Tabela para os chunks e embeddings dos documentos RAG
+create table public.document_embeddings (
+  id uuid default gen_random_uuid() primary key,
+  project_config_id uuid references public.project_configurations(id) on delete cascade,
+  source_document text not null,
+  chunk_index integer not null,
+  chunk_text text not null,
+  chunk_metadata jsonb,
+  embedding vector(1536) not null,
+  created_at timestamptz default now(),
+  
+  constraint unique_chunk unique(project_config_id, source_document, chunk_index)
+);
+comment on table public.document_embeddings is 'RAG Pipeline: Embeddings de documentos com isolamento por projeto (V5.0)';
+
+-- Tabela de Cache Semântico
+create table public.semantic_cache (
+  id uuid default gen_random_uuid() primary key,
+  project_config_id uuid references public.project_configurations(id) on delete cascade,
+  query_text text not null,
+  query_embedding vector(1536) not null,
+  response jsonb not null,
+  created_at timestamptz default now(),
+  hit_count integer default 0
+);
+comment on table public.semantic_cache is 'RAG Pipeline: Cache semântico de respostas de LLM para redução de custo/latência (V5.0)';
 
 -- ============================================================================
 -- 5. TABELA DE MÉTRICAS DE USO (Billing e Monitoring)
@@ -220,6 +253,8 @@ alter table public.policy_agents enable row level security;
 alter table public.audit_logs enable row level security;
 alter table public.usage_metrics enable row level security;
 alter table public.telemetry_events enable row level security;
+alter table public.document_embeddings enable row level security;
+alter table public.semantic_cache enable row level security;
 
 -- Políticas para users
 create policy "Users can view own profile" on public.users
@@ -333,6 +368,62 @@ create policy "Users can view telemetry of own projects" on public.telemetry_eve
     exists (
       select 1 from public.project_configurations p 
       where p.id = telemetry_events.project_config_id 
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+-- Políticas para document_embeddings (V5.0)
+create policy "Users can read own embeddings" on public.document_embeddings
+  for select using (
+    exists (
+      select 1 from public.project_configurations p 
+      where p.id = document_embeddings.project_config_id 
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+create policy "Users can insert own embeddings" on public.document_embeddings
+  for insert with check (
+    exists (
+      select 1 from public.project_configurations p 
+      where p.id = document_embeddings.project_config_id 
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+create policy "Users can delete own embeddings" on public.document_embeddings
+  for delete using (
+    exists (
+      select 1 from public.project_configurations p 
+      where p.id = document_embeddings.project_config_id 
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+-- Políticas para semantic_cache (V5.0)
+create policy "Users can read own semantic cache" on public.semantic_cache
+  for select using (
+    exists (
+      select 1 from public.project_configurations p 
+      where p.id = semantic_cache.project_config_id 
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+create policy "Users can insert own semantic cache" on public.semantic_cache
+  for insert with check (
+    exists (
+      select 1 from public.project_configurations p 
+      where p.id = semantic_cache.project_config_id 
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+create policy "Users can delete own semantic cache" on public.semantic_cache
+  for delete using (
+    exists (
+      select 1 from public.project_configurations p 
+      where p.id = semantic_cache.project_config_id 
       and p.owner_user_id = auth.uid()
     )
   );

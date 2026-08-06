@@ -2,14 +2,14 @@
 
 **Classification:** REFERENCE  
 **Codename:** `Message_Protocol`  
-**Version:** V4.5 (Loop Architecture + Fable Patterns)  
+**Version:** V5.0 (Loop Architecture + Fable Patterns)  
 **Context Layer:** Always (Communication Standard)  
 
 ---
 
 ## 1. Purpose
 
-This document defines the standardized message format for communication between Prisma V4.5 agents. Whether agents run in Solo mode (simulated context switching) or Multi mode (real subagent delegation), all inter-agent data exchange MUST follow this protocol.
+This document defines the standardized message format for communication between Prisma V5.0 agents. Whether agents run in Solo mode (simulated context switching) or Multi mode (real subagent delegation), all inter-agent data exchange MUST follow this protocol.
 
 **Why this matters:**
 - In Solo mode, the message format structures the agent's internal reasoning.
@@ -56,8 +56,8 @@ type AgentRole =
   | "DESIGN_AGENT"
   | "SECURITY_AGENT"
   | "POLICY_AGENT"
-  | "WATCHER_AGENT"              // V4.3 — Autonomous monitoring agent
-  | "SCOUT_AGENT";               // V4.4 — Intelligence gathering agent
+  | "WATCHER_AGENT"              // Autonomous monitoring agent
+  | "SCOUT_AGENT";               // Intelligence gathering agent
 
 type MessageType =
   | "TASK_ASSIGNMENT"        // Orchestrator → Agent: "Do this task"
@@ -78,14 +78,15 @@ type MessageType =
   | "TASK_ROUTING"           // Orchestrator → Router: "Classify this task"
   | "FRESH_EYES_AUDIT"       // Orchestrator → Fresh Auditor: "Zero-state review"
   | "CONTEXT_BREAK"          // Orchestrator → Self: "Anti-collapse marker"
-  | "RUBRIC_GENERATION"      // V4.3 — Architect → Orchestrator: "Here's the task rubric"
-  | "INCIDENT_BRIEFING"      // V4.3 — Watcher → Orchestrator: "Anomaly detected"
-  | "WATCHER_ALERT"          // V4.3 — Watcher → Human: "Threshold breached"
-  | "SESSION_START"          // V4.4 — Orchestrator → State: "Create session folder"
-  | "SESSION_END"            // V4.4 — Orchestrator → State: "Archive session folder"
-  | "SCOUT_MISSION"          // V4.4 — Architect → Scout: "Research this topic"
-  | "SCOUT_REPORT"           // V4.4 — Scout → Architect: "Here are the findings"
-  | "TELEMETRY_EVENT";       // V4.4 — Any → Watcher/State: "Observable action occurred"
+  | "RUBRIC_GENERATION"      // Architect → Orchestrator: "Here's the task rubric"
+  | "INCIDENT_BRIEFING"      // Watcher → Orchestrator: "Anomaly detected"
+  | "WATCHER_ALERT"          // Watcher → Human: "Threshold breached"
+  | "SESSION_START"          // Orchestrator → State: "Create session folder"
+  | "SESSION_END"            // Orchestrator → State: "Archive session folder"
+  | "SCOUT_MISSION"          // Architect → Scout: "Research this topic"
+  | "SCOUT_REPORT"           // Scout → Architect: "Here are the findings"
+  | "TELEMETRY_EVENT"        // Any → Watcher/State: "Observable action occurred"
+  | "LLM_CALL_FAILURE";     // V5.0 — Any → Watcher: "LLM API call failed after all retries"
 ```
 
 ---
@@ -109,7 +110,7 @@ interface TaskAssignmentPayload {
     max_iterations: number;              // Default: 3
     deadline_priority: "CRITICAL" | "HIGH" | "NORMAL";
   };
-  // V4.3 — Dynamic Rubric (Loop Architecture)
+  // Dynamic Rubric (Loop Architecture)
   task_specific_rubric?: string[];       // 3-5 boolean criteria from Architect
                                          // NEVER included when target is Worker
                                          // ALWAYS included when target is Auditor
@@ -152,7 +153,7 @@ interface AuditResultPayload {
   is_zero_shot: boolean;
   remediation_guidance?: string;          // For REJECTED
   escalation_reason?: string;             // For ESCALATED
-  // V4.3 — Dynamic Rubric Results
+  // Dynamic Rubric Results
   rubric_results?: Array<{               // How each dynamic criterion was evaluated
     criterion_id: string;                // "R1", "R2", etc.
     passed: boolean;                     // Pass/fail for this criterion
@@ -198,19 +199,19 @@ interface EscalationPayload {
 }
 ```
 
-### 3.6 TASK_ROUTING (V4.2 — Adaptive-Informed)
+### 3.6 TASK_ROUTING (Adaptive-Informed)
 
 ```typescript
 interface TaskRoutingPayload {
   task_description: string;
-  classified_type: "EXECUTION_ONLY" | "DEEP_READ" | "CREATION" | "HYBRID" | "DESIGN_FIRST" | "SPRINT_ZERO";
+  classified_type: "EXECUTION_ONLY" | "DEEP_READ" | "CREATION" | "HYBRID" | "DESIGN_FIRST" | "SPRINT_ZERO" | "RESEARCH";
   reasoning: string;                     // Why this classification
   sub_tasks?: TaskRoutingPayload[];     // For HYBRID decomposition
   skip_audit_loop: boolean;              // True for EXECUTION_ONLY and DEEP_READ
 }
 ```
 
-### 3.7 FRESH_EYES_AUDIT (V4.2 — Adaptive-Informed)
+### 3.7 FRESH_EYES_AUDIT (Adaptive-Informed)
 
 ```typescript
 interface FreshEyesAuditPayload {
@@ -223,7 +224,7 @@ interface FreshEyesAuditPayload {
 }
 ```
 
-### 3.8 CONTEXT_BREAK (V4.2 — Adaptive-Informed)
+### 3.8 CONTEXT_BREAK (Adaptive-Informed)
 
 ```typescript
 interface ContextBreakPayload {
@@ -235,7 +236,7 @@ interface ContextBreakPayload {
 }
 ```
 
-### 3.9 DESIGN_FIRST_PRD (V4.2 — Adaptive-Informed)
+### 3.9 DESIGN_FIRST_PRD (Adaptive-Informed)
 
 ```typescript
 interface DesignFirstPrdPayload {
@@ -247,7 +248,7 @@ interface DesignFirstPrdPayload {
 }
 ```
 
-### 3.10 INCIDENT_BRIEFING (V4.3 — Watcher Agent)
+### 3.10 INCIDENT_BRIEFING (Watcher Agent)
 
 ```typescript
 interface IncidentBriefingPayload {
@@ -269,7 +270,7 @@ interface IncidentBriefingPayload {
 }
 ```
 
-### 3.11 WATCHER_ALERT (V4.3 — Watcher Agent)
+### 3.11 WATCHER_ALERT (Watcher Agent)
 
 ```typescript
 interface WatcherAlertPayload {
@@ -288,7 +289,7 @@ interface WatcherAlertPayload {
 }
 ```
 
-### 3.13 SCOUT_MISSION (V4.4)
+### 3.12 SCOUT_MISSION
 
 ```typescript
 interface ScoutMissionPayload {
@@ -299,7 +300,7 @@ interface ScoutMissionPayload {
 }
 ```
 
-### 3.14 SCOUT_REPORT (V4.4)
+### 3.13 SCOUT_REPORT
 
 ```typescript
 interface ScoutReportPayload {
@@ -310,7 +311,7 @@ interface ScoutReportPayload {
 }
 ```
 
-### 3.15 TELEMETRY_EVENT (V4.4)
+### 3.14 TELEMETRY_EVENT
 
 ```typescript
 interface TelemetryEventPayload {
@@ -332,17 +333,29 @@ interface TelemetryEventPayload {
 
 ```
 Orchestrator ──TASK_ROUTING────► Task Router
-Task Router  ──TASK_ASSIGNMENT──► TRM_Worker
-TRM_Worker   ──CONTEXT_REQUEST──► RAG Pipeline
-RAG Pipeline ──CONTEXT_RESPONSE─► TRM_Worker
-TRM_Worker   ──TASK_DELIVERY────► Orchestrator
-Orchestrator ──CONTEXT_BREAK────► Self (anti-collapse)
-Orchestrator ──AUDIT_REQUEST────► Auditor_TRM
-Auditor_TRM  ──AUDIT_RESULT─────► Orchestrator
+Orchestrator ──SECURITY_CHECK───► Security_Agent
+Security_Agent─SECURITY_RESULT──► Orchestrator
   │
-  ├── APPROVED → Orchestrator advances sprint
-  └── REJECTED → Orchestrator re-routes to TRM_Worker with feedback
+  ├── BLOCKED → Orchestrator ──ESCALATION──► Human (unsafe input, halt sprint)
+  └── SAFE    → Continue
+       │
+       Task Router  ──TASK_ASSIGNMENT──► TRM_Worker
+       TRM_Worker   ──CONTEXT_REQUEST──► RAG Pipeline
+       RAG Pipeline ──CONTEXT_RESPONSE─► TRM_Worker
+       TRM_Worker   ──TASK_DELIVERY────► Orchestrator
+       Orchestrator ──CONTEXT_BREAK────► Self (anti-collapse)
+       Orchestrator ──AUDIT_REQUEST────► Auditor_TRM
+       Auditor_TRM  ──AUDIT_RESULT─────► Orchestrator
+         │
+         ├── APPROVED → Orchestrator advances sprint
+         └── REJECTED → Orchestrator re-routes to TRM_Worker with feedback
 ```
+
+**Fixed in this revision:** `07_Security_Agent.md` §1 claims to intercept "every input that enters
+the system... before reaching any other agent," but this flow previously went straight from
+`TASK_ROUTING` to `TASK_ASSIGNMENT` with no `SECURITY_CHECK` step at all — only §4.2 (V4 Policy
+Flow) had one, and only mid-flow, not at the entry point. The step above makes the persona's claim
+true for the default path, not just the V4 Policy Flow.
 
 ### 4.2 V4 Policy Flow
 
@@ -361,7 +374,7 @@ Security_Agent─SECURITY_RESULT──► Backend_Agent
        ...
 ```
 
-### 4.3 Fresh Eyes Flow (V4.2 — Adaptive-Informed)
+### 4.3 Fresh Eyes Flow (Adaptive-Informed)
 
 ```
 Orchestrator ──AUDIT_REQUEST────► Auditor_TRM (iteration 3)
@@ -394,7 +407,7 @@ Auditor_TRM  ──GATEWAY_RESULT──► Orchestrator
                Re-runs GATEWAY_CHECK after fixes
 ```
 
-### 4.5 Watcher Flow (V4.3 — Autonomous Monitoring)
+### 4.5 Watcher Flow (Autonomous Monitoring)
 
 ```
 Watcher_Agent ──[Scheduled/Manual]──► SQL Views (read-only)
@@ -416,7 +429,7 @@ Watcher_Agent ──[Scheduled/Manual]──► SQL Views (read-only)
              → Orchestrator may pause affected operations
 ```
 
-### 4.7 Scout Research Flow (V4.4)
+### 4.6 Scout Research Flow
 
 Occurs when the Architect encounters a task requiring external verification before planning.
 
@@ -442,7 +455,7 @@ Occurs when the Architect encounters a task requiring external verification befo
 [Architect] (Incorporates findings into 10_Implementation_Plan.md)
 ```
 
-### 4.8 Telemetry Ingestion Flow (V4.4)
+### 4.7 Telemetry Ingestion Flow
 
 Provides real-time event streaming for the Watcher Agent and future Dashboards, bypassing SQL delays.
 
@@ -509,4 +522,42 @@ This simulation ensures that even in Solo mode, the agent follows the same routi
 
 ---
 
-*Protocol generated under Prisma V4.5 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+## 7. V5.0 Payload Additions
+
+### 7.1 LLM_CALL_FAILURE
+
+**Reference:** `19_Resilience_Protocol.md` §4
+
+```typescript
+/**
+ * LlmCallFailurePayload: Emitted when an LLM call exhausts all retries
+ * or is blocked by the circuit breaker.
+ * 
+ * WHY this is separate from TELEMETRY_EVENT:
+ * - TELEMETRY_EVENT tracks observable actions that SUCCEEDED.
+ * - LLM_CALL_FAILURE tracks actions that FAILED despite retry attempts.
+ * - The Watcher needs this distinction to calculate provider reliability metrics
+ *   (e.g., llm_call_failure_rate, circuit_trips_per_session).
+ */
+interface LlmCallFailurePayload {
+  provider: string;                         // "anthropic" | "openai" | "google"
+  model: string;                            // "claude-opus-4" | "gpt-4o" | etc.
+  error_code: number;                       // HTTP status code (429, 503, 529, etc.)
+  error_message: string;                    // Provider error message text
+  retry_attempts: number;                   // How many retries were attempted (0 = blocked by circuit)
+  total_delay_ms: number;                   // Total time spent waiting between retries
+  circuit_breaker_state: "CLOSED" | "OPEN" | "HALF_OPEN";
+  blocked_by_circuit: boolean;              // true if circuit prevented the call entirely
+  fallback_triggered: boolean;              // true if Model Asymmetry (Orchestrator §13) kicked in
+  fallback_provider?: string;               // The provider used as fallback (if any)
+  task_id: string;                          // Links to the sprint task that was affected
+  impact: "TASK_DELAYED" | "TASK_FAILED" | "TASK_REROUTED";
+}
+```
+
+**Routing:** `Any Agent → WATCHER_AGENT`  
+**Priority:** `HIGH` (auto-elevated to `CRITICAL` if `circuit_breaker_state === "OPEN"`)
+
+---
+
+*Protocol generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

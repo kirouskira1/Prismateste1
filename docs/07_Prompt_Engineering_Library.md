@@ -2,7 +2,7 @@
 
 **Classification:** REFERENCE  
 **Codename:** `Prompt_Engineering_Library`  
-**Version:** V4.5 (Loop Architecture + Fable Patterns)  
+**Version:** V5.0 (Loop Architecture + Fable Patterns)  
 **Context Layer:** Task (Prompt Construction)  
 
 ---
@@ -291,5 +291,5 @@ validate at system boundaries (user input, external APIs).
 
 ---
 
-*Library generated under Prisma V4.5 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Library generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
 

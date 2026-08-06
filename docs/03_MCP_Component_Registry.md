@@ -1,8 +1,8 @@
-# Tools and Components Registry (MCPs) — Prisma V4
+# Tools and Components Registry (MCPs) — Prisma V5.0
 
 **Classification:** REFERENCE  
 **Codename:** `MCP_Component_Registry`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Task (UI Implementation)  
 **Est. Tokens:** ~600 tokens  
 
@@ -82,4 +82,4 @@ This document serves as the official "Parts Catalog." The TRM Cognitive Agent **
 
 ---
 
-*Registry generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Registry generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

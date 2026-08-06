@@ -3,7 +3,7 @@
 **Classification:** System Protocol  
 **Codename:** `Design_First_PRD`  
 **Effort Level:** `xhigh`  
-**Version:** V4.5 (Loop Architecture + Fable Patterns)  
+**Version:** V5.0 (Loop Architecture + Fable Patterns)  
 
 ---
 

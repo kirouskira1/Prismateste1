@@ -2,7 +2,7 @@
 
 **Classification:** REFERENCE  
 **Codename:** `Agent_Dashboard_Wireframe`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Task (UI Design)  
 **Est. Tokens:** ~300 tokens  
 
@@ -55,4 +55,4 @@ This document defines the visual and functional structure of the Governance Dash
 
 ---
 
-*Wireframe specification generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Wireframe specification generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

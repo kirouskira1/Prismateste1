@@ -1,8 +1,8 @@
-# Prisma AI V4: Conceptual Definitions and Deep Logic
+# Prisma AI V5.0: Conceptual Definitions and Deep Logic
 
 **Classification:** REFERENCE  
 **Codename:** `Concepts_DeepDive`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Always (Foundational Knowledge)  
 **Est. Tokens:** ~800 tokens  
 
@@ -14,7 +14,7 @@
 
 **The Concept:** Smaller models can outperform giant models when they use a recursive reasoning process (`z`) to iteratively refine their responses (`y`).
 
-**Adaptive Evolution (V4.2):** This concept is evolved via **Adaptive Thinking**. The model dynamically decides *how much* to think based on the `effort_level` of the task. Thinking is interleaved directly within tool calls, rather than being an external linear step.
+**Adaptive Evolution:** This concept is evolved via **Adaptive Thinking**. The model dynamically decides *how much* to think based on the `effort_level` of the task. Thinking is interleaved directly within tool calls, rather than being an external linear step.
 
 ### Translation to the Prisma Architecture (The "Engine"):
 
@@ -97,4 +97,4 @@ The greatest V4 innovation is the elimination of "hard-coded" business rules (e.
 
 ---
 
-*Reference document generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Reference document generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

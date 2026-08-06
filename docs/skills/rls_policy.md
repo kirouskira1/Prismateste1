@@ -109,4 +109,4 @@ Before declaring an RLS policy complete:
 
 ---
 
-*Skill file generated under Prisma V4.5 directives*
+*Skill file generated under Prisma V5.0 directives*

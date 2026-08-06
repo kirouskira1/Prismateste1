@@ -1,0 +1,40 @@
+name: Prisma V5.0 CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run Lint
+      run: npm run lint
+
+    - name: Version Consistency Gate
+      run: npm run check:version
+
+    - name: Run Unit Tests
+      run: npx vitest run
+      
+    - name: Run Offline Evals (Prompts Regression)
+      run: npx ts-node scripts/eval-runner.ts
+      env:
+        # In a real environment, you'd only run evals if prompt files changed
+        # or you'd use a dedicated secrets-based environment if the evals require LLM calls.
+        # Since this is an offline eval checking structural outputs, it's fast.
+        NODE_ENV: test

@@ -1,0 +1,41 @@
+name: Prisma V5.0 Headless Runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      briefing_json:
+        description: 'JSON payload defining the task (system and user prompt)'
+        required: true
+        type: string
+
+jobs:
+  run-prisma-agent:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Run Install Bootstrap
+      run: bash ./install.sh
+      
+    - name: Execute Task
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      run: |
+        echo '${{ github.event.inputs.briefing_json }}' > briefing.json
+        bash ./run.sh --briefing ./briefing.json --output ./agent_output
+        
+    - name: Archive Output
+      uses: actions/upload-artifact@v4
+      with:
+        name: prisma-agent-output
+        path: ./agent_output/

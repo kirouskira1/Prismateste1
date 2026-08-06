@@ -1,8 +1,8 @@
-# Stitch Prompting Protocol — Prisma V4
+# Stitch Prompting Protocol — Prisma V5.0
 
 **Classification:** REFERENCE  
 **Codename:** `Stitch_Protocol`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Task (Visual Prototyping)  
 **Est. Tokens:** ~600 tokens  
 
@@ -55,7 +55,7 @@ When requesting an interface from Stitch, the Architect must build the prompt fo
 
 ---
 
-## 3. How to Use the Output (V4.2 Flow)
+## 3. How to Use the Output
 
 > **Design-First PRD Note:** Se a referência inicial for uma imagem/mockup ou mesmo um HTML do Stitch, o sistema não deve codificar o React diretamente. Ele DEVE gerar o *Design-First PRD* detalhando o layout e componentes antes da refatoração final. (ref: `18_Design_First_PRD_Protocol.md`).
 
@@ -71,4 +71,4 @@ When requesting an interface from Stitch, the Architect must build the prompt fo
 
 ---
 
-*Protocol generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Protocol generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

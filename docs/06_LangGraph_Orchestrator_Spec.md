@@ -2,8 +2,10 @@
 
 **Classification:** REFERENCE  
 **Codename:** `LangGraph_Orchestrator`  
-**Version:** V4.5 (Loop Architecture + Fable Patterns)  
+**Version:** V5.0 (Loop Architecture + Fable Patterns)  
 **Context Layer:** Phase (Orchestration Setup)  
+
+> ⚠️ **Modo não ativo neste projeto.** `prisma.config.json` declara `"execution_mode": "SOLO"` — este documento especifica o orquestrador **Multi-Agent via LangGraph/Python**, um modo alternativo de execução ainda não em uso aqui. Agentes de IA não devem assumir que este é o modo de orquestração corrente; consulte `.prisma/state.json` (`execution_mode`) para o modo real da sessão.
 
 ---
 
@@ -24,18 +26,18 @@ class AgentState(TypedDict):
     project_context: Dict        # Briefing data (entities, flows)
     current_task: Dict           # Active task from sprint plan
     
-    # --- V4.4 Session Isolation ---
+    # --- Session Isolation ---
     active_session_id: str
     session_path: str
     
-    # --- V4.4 Telemetry Stream ---
+    # --- Telemetry Stream ---
     telemetry_log: List[Dict]    # Append-only list of TELEMETRY_EVENT payloads
     
     # --- Architecture Control (V4) ---
     compilation_target: str      # 'V3.1', 'V4' or 'HYBRID' (Set during Triage)
     risk_level: str              # 'LOW', 'MEDIUM', 'HIGH'
     
-    # --- Task Type Router (V4.2 — Adaptive-Informed) ---
+    # --- Task Type Router (Adaptive-Informed) ---
     task_type: str               # 'EXECUTION_ONLY', 'DEEP_READ', 'CREATION', 'HYBRID', 'DESIGN_FIRST', 'SPRINT_ZERO'
     
     # --- Resource Control (Optimization) ---
@@ -49,16 +51,16 @@ class AgentState(TypedDict):
     quality_score: float         # Score 0.0 to 10.0
     iteration_count: int         # Attempt counter (Max: configurable)
     
-    # --- Fresh Eyes (V4.2 — Adaptive-Informed) ---
+    # --- Fresh Eyes (Adaptive-Informed) ---
     fresh_eyes_used: bool        # Has Fresh Eyes been triggered?
     fresh_eyes_bonus: bool       # Was bonus iteration granted?
     root_cause_finding: Optional[str]  # What Fresh Eyes found
     
-    # --- Dynamic Rubric (V4.3 — Loop Architecture) ---
+    # --- Dynamic Rubric (Loop Architecture) ---
     task_specific_rubric: List[str]     # 3-5 boolean criteria from Architect
     rubric_results: Optional[List[Dict]]  # Auditor's evaluation of each criterion
     
-    # --- Model Routing (V4.3 — Multi-Vendor Orchestration) ---
+    # --- Model Routing (Multi-Vendor Orchestration) ---
     model_config: Dict[str, str]       # Maps AgentRole → model_name
                                        # e.g. {"TRM_WORKER": "claude-3.5-sonnet",
                                        #        "AUDITOR_TRM": "gpt-4o"}
@@ -76,7 +78,7 @@ class AgentState(TypedDict):
 - **Function:** Analyzes `project_context` and defines `compilation_target`.
 - **Rule:** If briefing contains "compliance", "audit-trail", or "approval hierarchy" → Target = `V4`.
 
-### B. Node: `Task_Router` (V4.3 — Adaptive-Informed)
+### B. Node: `Task_Router` (Adaptive-Informed)
 - **Function:** Classifies `current_task` into task types before entering the TRM loop.
 - **Rule:** Maps task description to `EXECUTION_ONLY`, `DEEP_READ`, `CREATION`, `HYBRID`, `DESIGN_FIRST`, or `SPRINT_ZERO`. Sets `effort_level` accordingly.
 - **Edge:** Routes directly to execution (bypass TRM), `TRM_Worker`, or `Design_Agent`.
@@ -92,7 +94,7 @@ class AgentState(TypedDict):
 ### D. Node: `Auditor` (The Conscience)
 - **Function:** Validates `code_draft`.
 - **Inputs:** Generated code + `04_Audit_Framework.md`.
-- **Anti-Collapse (V4.1):** The Auditor node receives a **filtered state** — the `reasoning_trace` key is explicitly removed before passing state to this node. This prevents orchestration collapse.
+- **Anti-Collapse:** The Auditor node receives a **filtered state** — the `reasoning_trace` key is explicitly removed before passing state to this node. This prevents orchestration collapse.
 - **Output:** Updates `quality_score` and `audit_feedback`.
 
 ### E. Node: `Design_Agent` (Factory 1)
@@ -100,7 +102,7 @@ class AgentState(TypedDict):
 - **Rule:** Bypasses TRM Loop. Outputs a specification document.
 - **Output:** Updates `project_context` with PRD Visual.
 
-### F. Node: `Scout_Agent` (V4.4)
+### F. Node: `Scout_Agent`
 - **Function:** Handles `RESEARCH` tasks (web search, docs parsing).
 - **Rule:** Bypasses TRM Worker. Does not write code.
 - **Output:** Emits a `ScoutReportPayload` and updates `project_context` with intelligence before returning to Architect.
@@ -110,29 +112,29 @@ class AgentState(TypedDict):
 - **Rule:** 
   1. Deletes `reasoning_trace` completely.
   2. Deletes `session_path` so the Auditor cannot peek into the worker's temporal folder.
-  3. Preserves `task_specific_rubric` (V4.3 rule).
+  3. Preserves `task_specific_rubric`.
 - **Why:** The Auditor must evaluate the raw output (`code_draft`) against the framework, unaffected by the Worker's logic or internal scratchpad.
 
 ```python
 def filter_state_for_auditor(state: AgentState) -> AgentState:
     """Anti-Collapse: Remove Worker's reasoning from Auditor's view.
-    V4.3: Preserve task_specific_rubric — the Auditor MUST see it."""
+    Preserve task_specific_rubric — the Auditor MUST see it."""
     filtered = dict(state)
     filtered.pop('reasoning_trace', None)
     filtered.pop('session_path', None)
-    # V4.3: task_specific_rubric is intentionally KEPT in filtered state.
+    # task_specific_rubric is intentionally KEPT in filtered state.
     # The rubric flows: Architect → State → Auditor (never to Worker).
     return filtered
 
 def filter_state_for_worker(state: AgentState) -> dict:
-    """V4.3: Remove rubric from Worker's view to prevent gaming."""
+    """Remove rubric from Worker's view to prevent gaming."""
     filtered = dict(state)
     filtered.pop('task_specific_rubric', None)  # Worker must not see grading criteria
     filtered.pop('rubric_results', None)         # No previous rubric evaluations
     return filtered
 ```
 
-### E. Node: `Fresh_Eyes_Tiebreaker` (V4.2 — Adaptive-Informed)
+### E. Node: `Fresh_Eyes_Tiebreaker` (Adaptive-Informed)
 - **Function:** Invoked when the standard TRM loop exhausts all iterations without success.
 - **Inputs:** ONLY `code_draft` (final version) + `current_task` (original). No iteration history.
 - **Action:**
@@ -149,7 +151,7 @@ Transitions use declarative routing:
 
 ```python
 def route_task_type(state: AgentState) -> str:
-    """V4.3: Route based on task type before entering TRM loop."""
+    """Route based on task type before entering TRM loop."""
     task_type = state.get('task_type', 'CREATION')
     
     if task_type == 'EXECUTION_ONLY':
@@ -201,4 +203,19 @@ def route_after_audit(state: AgentState) -> str:
 
 ---
 
-*Specification generated under Prisma V4.5 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+## 5. Asynchronous Bus & LangGraph Checkpoints (V5.0)
+
+**Insight:** In production, agents must not run on synchronous HTTP requests. A full TRM loop with model fallbacks can take 3-5 minutes. The Orchestrator must be decoupled via an asynchronous bus.
+
+### 5.1 Checkpoint Architecture
+The LangGraph `checkpointer` must use PostgreSQL (Supabase). This ensures:
+1. **Fault Tolerance:** If a worker node crashes mid-generation, a new instance resumes from the exact last state.
+2. **Human-in-the-loop (Escalation):** When the Orchestrator hits the `escalate_to_human` node, it writes the state to the checkpoint and pauses. The API can resume the graph using `thread_id` once the human approves.
+
+### 5.2 Event Stream Webhooks
+Instead of waiting for a single output, the Orchestrator emits `TELEMETRY_EVENT` items to an Event Bus (e.g., Redis or Kafka, depending on scale).
+- Client dashboards connect via WebSocket to the Event Bus to render real-time logs (e.g., "Agent is thinking...", "Auditor rejected code: Zod missing").
+
+---
+
+*Specification generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

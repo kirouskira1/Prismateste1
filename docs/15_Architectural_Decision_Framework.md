@@ -2,9 +2,11 @@
 
 **Classification:** REFERENCE  
 **Codename:** `ADR_Framework`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Phase (Initial Triage)  
 **Est. Tokens:** ~300 tokens  
+
+> **Nota de desambiguação:** o campo `compilation_target` descrito abaixo (`"V3.1"` | `"V4"` | `"HYBRID"`) é um **rótulo fixo de perfil arquitetural** do projeto gerado, não relacionado à versão do Kernel Prisma (acima). "V4" aqui nunca deve ser lido como "versão desatualizada do framework" — é um nome de arquitetura permanente. Ver [[26_Version_Unification_Plan]].
 
 ---
 
@@ -79,4 +81,4 @@ RECEIVE project briefing
 
 ---
 
-*Framework generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Framework generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

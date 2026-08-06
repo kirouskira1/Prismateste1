@@ -1,0 +1,35 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["next/router", "next/document", "next/head"],
+            "message": "Pages Router is forbidden by Prisma V5.0+ Anti-Legacy Filter. Use App Router instead."
+          },
+          {
+            "group": ["@prisma/client"],
+            "message": "Prisma ORM is forbidden. Use @supabase/ssr instead."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.name='fetch']",
+        "message": "Direct fetch() calls are forbidden in UI components. Use Server Actions or consultPolicyAgent() instead."
+      }
+    ]
+  }
+}

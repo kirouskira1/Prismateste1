@@ -1,8 +1,8 @@
-# Prisma AI V4: Hybrid Architecture Whitepaper
+# Prisma AI V5.0: Hybrid Architecture Whitepaper
 
 **Classification:** REFERENCE  
 **Codename:** `Whitepaper_Architecture`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Always (Strategic Foundation)  
 **Est. Tokens:** ~800 tokens  
 
@@ -38,7 +38,7 @@ How does Prisma build itself?
 
 We use the **IDE Agent in Solo Mode** as the initial executor.
 
-1. **Input:** The complete V4 Dossier (these documents) acts as the agent's "Implanted Memory."
+1. **Input:** The complete V5.0 Dossier (these documents) acts as the agent's "Implanted Memory."
 2. **Process:** The agent simulates the **TRM Cognitive Agent**. For each task from the sprint plan, it:
    - Consults the relevant agent spec to know *how* to think.
    - Generates a draft.
@@ -48,7 +48,7 @@ We use the **IDE Agent in Solo Mode** as the initial executor.
 
 ---
 
-## 3. Official V4 Technology Stack
+## 3. Official Technology Stack
 
 | Layer | Technology | Purpose |
 |:---|:---|:---|
@@ -63,4 +63,20 @@ We use the **IDE Agent in Solo Mode** as the initial executor.
 
 ---
 
-*Whitepaper generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+## 4. Multi-Vendor Orchestration & Model Asymmetry (V5.0)
+
+**Insight:** Relying on a single LLM provider creates a single point of failure and systemic bias (models naturally approve code they would generate). Prisma V5.0 implements **Model Asymmetry**:
+
+- **TRM Worker:** Default `claude-3.5-sonnet` (superior for coding/scaffolding).
+- **Auditor TRM:** Default `gpt-4o` (superior for strict critique and spotting Sonnet's specific anti-patterns).
+- **Fresh Eyes / Tiebreaker:** Default `gemini-1.5-pro` (superior context window for full-repository grounding).
+
+### Fallback Cascade (Circuit Breaker)
+If Anthropic API goes down, the Orchestrator automatically re-routes:
+1. `Worker` → `gpt-4o`
+2. `Auditor` → `gemini-1.5-pro`
+*(See `19_Resilience_Protocol.md` for exact circuit breaker implementation)*.
+
+---
+
+*Whitepaper generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

@@ -1,8 +1,8 @@
-# External Knowledge References and Inspiration — Prisma V4
+# External Knowledge References and Inspiration — Prisma V5.0
 
 **Classification:** REFERENCE  
 **Codename:** `External_References`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Always (Bibliography)  
 **Est. Tokens:** ~700 tokens  
 
@@ -95,4 +95,4 @@ This document lists the primary sources, tools, and concepts that underpin the P
 
 ---
 
-*References compiled under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*References compiled under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

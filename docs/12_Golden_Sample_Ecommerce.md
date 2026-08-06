@@ -2,7 +2,7 @@
 
 **Classification:** REFERENCE  
 **Codename:** `Golden_Sample_Ecommerce`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Always (Architectural Reference)  
 **Est. Tokens:** ~1,000 tokens  
 
@@ -262,4 +262,4 @@ V4 (Policy Agent):
 
 ---
 
-*Golden Sample generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Golden Sample generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

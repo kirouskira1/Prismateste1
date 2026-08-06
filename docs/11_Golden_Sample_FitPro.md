@@ -2,7 +2,7 @@
 
 **Classification:** REFERENCE  
 **Codename:** `Golden_Sample_FitPro`  
-**Version:** V4  
+**Version:** V5.0  
 **Context Layer:** Always (Architectural Reference)  
 **Est. Tokens:** ~800 tokens  
 
@@ -156,4 +156,4 @@ In the Agent Control Center (Dashboard), the Personal Trainer would see:
 
 ---
 
-*Golden Sample generated under Prisma V4 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
+*Golden Sample generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*
