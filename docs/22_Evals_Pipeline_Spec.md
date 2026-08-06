@@ -134,6 +134,12 @@ Whenever a new `PromptVersion` is generated (via `16_Evolutionary_Optimizer` or 
 2. If `eval_pass_rate` drops by **> 5%** compared to the `parent_hash` version's score, a **REGRESSION** is declared.
 3. The Orchestrator automatically blocks the prompt promotion and initiates Rollback.
 
+**Calibration:** the 5% figure is a declared starting point, not derived from observed variance
+across repeated eval runs of an unchanged prompt — without that baseline noise measurement, it's
+not possible to know whether 5% is comfortably above natural run-to-run variance or close enough
+to it to cause false-positive rollbacks. Measure baseline variance first, then set this threshold
+above it. See `docs/29_Methodology_Gaps_Implementation_Plan.md` Sprint C2.
+
 ---
 
 *Specification generated under Prisma V5.0 Kernel directives — Lead Architect Pedro Lucas Santos de Araújo*

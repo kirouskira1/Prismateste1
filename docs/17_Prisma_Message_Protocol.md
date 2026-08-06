@@ -86,7 +86,12 @@ type MessageType =
   | "SCOUT_MISSION"          // Architect → Scout: "Research this topic"
   | "SCOUT_REPORT"           // Scout → Architect: "Here are the findings"
   | "TELEMETRY_EVENT"        // Any → Watcher/State: "Observable action occurred"
-  | "LLM_CALL_FAILURE";     // V5.0 — Any → Watcher: "LLM API call failed after all retries"
+  | "LLM_CALL_FAILURE"      // V5.0 — Any → Watcher: "LLM API call failed after all retries"
+  | "PRODUCTION_INCIDENT_LINKED"; // V5.0 — Watcher → Orchestrator: "A real production bug was
+                                  // traced back to an audit_log/generated_artifact" — the
+                                  // production-feedback-loop signal that closes the gap where
+                                  // the quality system only ever measured itself (see
+                                  // docs/29_Methodology_Gaps_Implementation_Plan.md Sprint C1)
 ```
 
 ---
@@ -324,6 +329,53 @@ interface TelemetryEventPayload {
   metadata?: Record<string, unknown>;     // E.g., { "score": 9.2 }
 }
 ```
+
+### 3.15 PRODUCTION_INCIDENT_LINKED (V5.0 — Production Feedback Loop)
+
+```typescript
+/**
+ * Emitted when a real production bug is traced back to code this system approved.
+ * This is the ONE message type in the whole protocol whose signal originates
+ * OUTSIDE the agent system (a human/support flow reports it) — everything else
+ * measures the agents' own behavior. Without this, common_violations (§9.2 of
+ * 00_Orchestrator_Protocol.md) only ever learns from what the Auditor itself
+ * caught, never from what it missed. See docs/29_Methodology_Gaps_Implementation_Plan.md
+ * Sprint C1.
+ */
+interface ProductionIncidentLinkedPayload {
+  incident_id: string;                    // uuid, mirrors production_incidents.id
+  related_audit_log_id?: string;
+  related_generated_artifact_id?: string;
+  severity: "low" | "medium" | "high" | "critical";
+  description: string;
+  reported_at: string;                    // ISO-8601
+}
+```
+
+**Routing:** `Watcher_Agent → ORCHESTRATOR`. **Effect:** the Orchestrator writes a `common_violations`
+entry in `learnings.json` with `source: "production"` (§9.2) — a category that did not exist before
+this message type, distinguishing violations the Auditor itself found from ones only production
+traffic revealed.
+
+### 3.16 POLICY_FEEDBACK_VOTE (V5.0 — Human Feedback Pipeline)
+
+```typescript
+/**
+ * The dashboard's 👍/👎 buttons (13_Agent_Dashboard_Wireframe_Spec.md §3) had no
+ * described destination before this — this is that destination.
+ */
+interface PolicyFeedbackVotePayload {
+  audit_log_id: string;
+  user_id: string;
+  vote: "up" | "down";
+  comment?: string;
+}
+```
+
+**Routing:** `Dashboard (Human) → ORCHESTRATOR → 16_Evolutionary_Optimizer`. **Effect:** persisted to
+`policy_decision_feedback`; a `"down"` vote above a configurable threshold on the same
+`policy_agent_id` makes that decision a candidate contraexample for the Golden Sample / Evals
+dataset (`docs/22_Evals_Pipeline_Spec.md`) — see `docs/16_Evolutionary_Optimizer_Spec.md` §6.
 
 ---
 

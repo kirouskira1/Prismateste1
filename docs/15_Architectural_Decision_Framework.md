@@ -56,7 +56,7 @@ The Contextual Auditor returns a JSON that defines the factory's operation mode:
 |:---|:---|
 | Scenario | Complex system with both static and volatile modules |
 | Action | V4 core (Agents) + V3.1 modules (Fast Code) |
-| Rule | If the rule is volatile (pricing, limits) → Agent. If static (login, CRUD) → Code. |
+| Rule | If the rule is volatile AND requires textual/contextual judgment → Agent. If volatile but a single simple value (a limit, rate, or price with no judgment needed) → `business_config` lookup, no Agent required. If static (login, CRUD) → Code. See `05_Backend_Agent.md` §3.3 "The Rule Detector" for the full test. |
 
 ---
 

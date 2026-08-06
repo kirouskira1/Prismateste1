@@ -44,6 +44,7 @@ Advanced practices in multi-agent systems identified "Orchestration Collapse" as
   <load_if_needed>
     <file>05_Security_Governance_Policy.md</file>
     <file>11_Golden_Sample_FitPro.md</file>
+    <file>05_Backend_Agent.md §3.3 (The Rule Detector — needed to judge whether a business_config lookup satisfies the Hard-Coding Prohibition, since 04_Audit_Framework.md §1 alone does not define that tier)</file>
   </load_if_needed>
   <never_load>
     <file>02_Worker_TRM_Agent.md</file>

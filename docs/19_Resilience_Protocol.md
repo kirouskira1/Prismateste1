@@ -235,6 +235,11 @@ The Circuit Breaker prevents the system from repeatedly calling a provider that 
  *   30s = long enough for most transient issues to resolve.
  * - monitorWindowMs: Rolling window for counting failures. Prevents ancient failures
  *   from keeping the circuit open forever.
+ *
+ * CALIBRATION: all three defaults below are reasonable-sounding starting points, not values
+ * derived from observed provider failure/recovery statistics — there is no real production
+ * traffic yet to measure against. Revisit once real `circuit_trips_per_session` data exists
+ * (08_Watcher_Agent.md metrics). See docs/29_Methodology_Gaps_Implementation_Plan.md Sprint C2.
  */
 interface CircuitBreakerConfig {
   failureThreshold: number;        // Default: 5 consecutive failures

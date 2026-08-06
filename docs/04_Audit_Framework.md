@@ -15,9 +15,10 @@ This document is the "Supreme Law" of Prisma. The TRM Cognitive Agent **MUST** u
 
 *This section ensures we are building an Agent Platform (BPA), not a legacy monolith.*
 
-- [ ] **Hard-Coding Prohibition:** Does the code contain fixed business values (e.g., rates, limits, deadlines)?
+- [ ] **Hard-Coding Prohibition:** Does the code contain fixed business values (e.g., rates, limits, deadlines) with the literal value in source, instead of fetched from somewhere?
     - *Fail:* `if (order.total > 500)`
-    - *Pass:* `const policy = await consultPolicyAgent(order)`
+    - *Pass (simple volatile value, no textual judgment needed):* a `business_config` key/value lookup — `const { data } = await supabase.from("business_config")...` (see `05_Backend_Agent.md` §3.3 "The Rule Detector", outcome (b))
+    - *Pass (requires interpreting natural-language/contextual rules):* `const policy = await consultPolicyAgent(order)` (outcome (c))
 - [ ] **Agent Abstraction:** Is complex decision logic encapsulated in a separate "Policy Agent" service invoked via `consultPolicyAgent()`?
 - [ ] **External Source of Truth:** Does the agent query a knowledge base (Client RAG) or dynamic configuration before making a decision?
 
@@ -96,6 +97,12 @@ Weights (when dynamic rubric IS provided):
 
 Threshold: score >= 9.5 → APPROVED
            score <  9.5 → REJECTED + feedback
+
+**Calibração:** o valor 9.5 é um ponto de partida declarado, não derivado empiricamente — não há,
+em nenhum documento, uma taxa de falso-aprovação/falso-rejeição medida que justifique 9.5 em vez de
+9.0 ou 9.8. Recalibrar depois de acumular resultados reais de `docs/22_Evals_Pipeline_Spec.md`
+(comparar taxa de aprovação dos 20 Golden Cases em diferentes thresholds). Ver
+`docs/29_Methodology_Gaps_Implementation_Plan.md` Sprint C2.
 ```
 
 ---

@@ -144,6 +144,72 @@ create table public.semantic_cache (
 comment on table public.semantic_cache is 'RAG Pipeline: Cache semântico de respostas de LLM para redução de custo/latência (V5.0)';
 
 -- ============================================================================
+-- 4.C BUSINESS CONFIG — TERCEIRO NÍVEL DO RULE DETECTOR (V5.0)
+-- ============================================================================
+
+-- Tabela de Configuração de Negócio (Chave-Valor)
+-- Tier intermediário entre "implementar direto" e Policy Agent: valores voláteis
+-- porém simples (limiares, taxas, prazos) que não exigem julgamento textual ou
+-- contextual. Evita o custo de latência/RAG+LLM do Policy Agent para um número
+-- puro (ver 05_Backend_Agent.md §3.3 "The Rule Detector").
+create table public.business_config (
+  id uuid default gen_random_uuid() primary key,
+  project_config_id uuid references public.project_configurations(id) on delete cascade not null,
+  key text not null, -- ex: "manual_approval_order_threshold_usd"
+  value jsonb not null, -- Valor simples: number, string ou boolean (ex: 1000, "0.05", true)
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+
+  constraint key_format
+    check (key ~ '^[a-z][a-z0-9_]*$'),
+  constraint unique_project_key
+    unique(project_config_id, key)
+);
+comment on table public.business_config is 'Chave-valor para regras de negócio voláteis porém simples (limiares, taxas, prazos) que não exigem julgamento textual/contextual — Tier 2 do Rule Detector (ver 05_Backend_Agent.md §3.3)';
+
+-- ============================================================================
+-- 4.D PRODUCTION FEEDBACK LOOP (V5.0)
+-- Resolve docs/28_LangGraph_Feasibility_Analysis.md §8.1 e §8.4: hoje nada conecta um
+-- bug real de produção, ou um voto humano de like/dislike, de volta ao audit_log que
+-- aprovou aquele código. As duas tabelas abaixo são essa ligação que faltava.
+-- ============================================================================
+
+-- Tabela de Incidentes de Produção (liga um bug real ao audit_log que aprovou o código)
+create table public.production_incidents (
+  id uuid default gen_random_uuid() primary key,
+  related_audit_log_id uuid references public.audit_logs(id) on delete set null,
+  related_generated_artifact_id uuid references public.generated_artifacts(id) on delete set null,
+  project_config_id uuid references public.project_configurations(id) on delete cascade not null,
+  severity text not null default 'medium', -- 'low' | 'medium' | 'high' | 'critical'
+  description text not null,
+  reported_by_user_id uuid references public.users(id),
+  reported_at timestamptz default now(),
+  resolved_at timestamptz,
+
+  constraint severity_valid
+    check (severity in ('low', 'medium', 'high', 'critical')),
+  constraint at_least_one_link
+    check (related_audit_log_id is not null or related_generated_artifact_id is not null)
+);
+comment on table public.production_incidents is 'Bugs reais de produção ligados ao audit_log/artefato que os originou — fecha a malha de retroalimentação que o sistema de qualidade (Kill Switches, score >= 9.5) não tem sozinho, porque mede se o código parece certo, não se ele se comportou certo depois';
+
+-- Tabela de Feedback Humano em Decisões de Policy Agent (RLHF)
+create table public.policy_decision_feedback (
+  id uuid default gen_random_uuid() primary key,
+  audit_log_id uuid references public.audit_logs(id) on delete cascade not null,
+  user_id uuid references public.users(id) on delete cascade not null,
+  vote text not null, -- 'up' | 'down'
+  comment text,
+  created_at timestamptz default now(),
+
+  constraint vote_valid
+    check (vote in ('up', 'down')),
+  constraint unique_user_vote_per_decision
+    unique(audit_log_id, user_id)
+);
+comment on table public.policy_decision_feedback is 'Voto 👍/👎 do dashboard (13_Agent_Dashboard_Wireframe_Spec.md §3) em uma decisão de Policy Agent — antes desta tabela, o voto não tinha destino: nenhum lugar do sistema consumia esse dado';
+
+-- ============================================================================
 -- 5. TABELA DE MÉTRICAS DE USO (Billing e Monitoring)
 -- ============================================================================
 
@@ -219,6 +285,23 @@ create index idx_telemetry_session on public.telemetry_events(session_id);
 create index idx_telemetry_event_type on public.telemetry_events(event_type);
 create index idx_telemetry_created on public.telemetry_events(created_at desc);
 
+-- Índices em business_config
+-- (Nenhum índice em project_config_id sozinho: unique_project_key(project_config_id, key)
+-- já cobre isso via leftmost-prefix — mesma convenção de document_embeddings/semantic_cache.)
+create index idx_business_config_key on public.business_config(key);
+
+-- Índices em production_incidents
+create index idx_production_incidents_project on public.production_incidents(project_config_id);
+create index idx_production_incidents_audit_log on public.production_incidents(related_audit_log_id);
+create index idx_production_incidents_unresolved on public.production_incidents(project_config_id) where resolved_at is null;
+
+-- Índices em policy_decision_feedback
+-- Nenhum índice extra: unique_user_vote_per_decision(audit_log_id, user_id) já serve
+-- lookup por audit_log_id sozinho via leftmost-prefix — mesmo raciocínio já corrigido
+-- em business_config acima (achado real do Auditor nesta sessão, ver docs/29 §4.2).
+-- Sem essa nota, era fácil reintroduzir o mesmo erro em tabela nova — o que quase
+-- aconteceu aqui mesmo: a primeira versão desta linha tinha um índice redundante.
+
 -- ============================================================================
 -- 7. TRIGGERS AUTOMÁTICOS
 -- ============================================================================
@@ -242,6 +325,11 @@ create trigger set_updated_at_policy_agents
   before update on public.policy_agents
   for each row execute function update_updated_at_column();
 
+-- Trigger em business_config
+create trigger set_updated_at_business_config
+  before update on public.business_config
+  for each row execute function update_updated_at_column();
+
 -- ============================================================================
 -- 8. SEGURANÇA (RLS - Row Level Security)
 -- ============================================================================
@@ -255,6 +343,9 @@ alter table public.usage_metrics enable row level security;
 alter table public.telemetry_events enable row level security;
 alter table public.document_embeddings enable row level security;
 alter table public.semantic_cache enable row level security;
+alter table public.business_config enable row level security;
+alter table public.production_incidents enable row level security;
+alter table public.policy_decision_feedback enable row level security;
 
 -- Políticas para users
 create policy "Users can view own profile" on public.users
@@ -422,11 +513,91 @@ create policy "Users can insert own semantic cache" on public.semantic_cache
 create policy "Users can delete own semantic cache" on public.semantic_cache
   for delete using (
     exists (
-      select 1 from public.project_configurations p 
-      where p.id = semantic_cache.project_config_id 
+      select 1 from public.project_configurations p
+      where p.id = semantic_cache.project_config_id
       and p.owner_user_id = auth.uid()
     )
   );
+
+-- Políticas para business_config (V5.0)
+create policy "Users can view own business config" on public.business_config
+  for select using (
+    exists (
+      select 1 from public.project_configurations p
+      where p.id = business_config.project_config_id
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+create policy "Users can insert own business config" on public.business_config
+  for insert with check (
+    exists (
+      select 1 from public.project_configurations p
+      where p.id = business_config.project_config_id
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+create policy "Users can update own business config" on public.business_config
+  for update using (
+    exists (
+      select 1 from public.project_configurations p
+      where p.id = business_config.project_config_id
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+create policy "Users can delete own business config" on public.business_config
+  for delete using (
+    exists (
+      select 1 from public.project_configurations p
+      where p.id = business_config.project_config_id
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+-- Políticas para production_incidents (V5.0)
+create policy "Users can view own production incidents" on public.production_incidents
+  for select using (
+    exists (
+      select 1 from public.project_configurations p
+      where p.id = production_incidents.project_config_id
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+create policy "Users can insert own production incidents" on public.production_incidents
+  for insert with check (
+    exists (
+      select 1 from public.project_configurations p
+      where p.id = production_incidents.project_config_id
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+create policy "Users can update own production incidents" on public.production_incidents
+  for update using (
+    exists (
+      select 1 from public.project_configurations p
+      where p.id = production_incidents.project_config_id
+      and p.owner_user_id = auth.uid()
+    )
+  );
+
+-- Políticas para policy_decision_feedback (V5.0)
+-- Mais simples que as demais: cada linha já É o voto do próprio usuário, não precisa
+-- de join até project_configurations para estabelecer posse.
+create policy "Users can view own feedback votes" on public.policy_decision_feedback
+  for select using (auth.uid() = user_id);
+
+create policy "Users can insert own feedback votes" on public.policy_decision_feedback
+  for insert with check (auth.uid() = user_id);
+
+create policy "Users can update own feedback votes" on public.policy_decision_feedback
+  for update using (auth.uid() = user_id);
+
+create policy "Users can delete own feedback votes" on public.policy_decision_feedback
+  for delete using (auth.uid() = user_id);
 
 -- ============================================================================
 -- 9. VIEWS ÚTEIS (Analytics e Dashboards)

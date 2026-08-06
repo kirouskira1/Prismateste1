@@ -292,7 +292,7 @@ The Architect Agent is the **guardian of the 4 Gateways**. It executes each veri
 > "Did I avoid `'use client'` on entire pages? Are Server Components the rule? Is native Dark Mode (`bg-slate-950`) respected?"
 
 ### V4-Exclusive Audit — Zero Hard-Code
-> "Does the code contain hard-coded business rules (`if (value > 500)`)? If yes, **REJECTED**. Logic must be delegated to a Policy Agent that consults the Client RAG."
+> "Does the code contain hard-coded business rules (`if (value > 500)`)? If yes, **REJECTED**. Logic must either be delegated to a Policy Agent that consults the Client RAG (if it requires textual/contextual judgment), or looked up in the `business_config` table (if it is a single volatile value with no judgment required — see `05_Backend_Agent.md` §3.3 'The Rule Detector')."
 
 ---
 

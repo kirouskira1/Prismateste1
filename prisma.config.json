@@ -8,7 +8,8 @@
     "max_audit_attempts": 3,
     "quality_threshold": 9.5,
     "fresh_eyes_enabled": true,
-    "single_artifact_cadence": true
+    "single_artifact_cadence": true,
+    "max_cost_per_task_usd": 2.0
   },
   "thinking_mode": {
     "type": "adaptive",

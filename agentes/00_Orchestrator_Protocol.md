@@ -435,6 +435,15 @@ Prisma adapts this for both execution modes:
 ```
 TRIGGER: iteration_count >= max_attempts AND score < 9.5
          (Standard TRM loop has exhausted all refinement attempts)
+      OR current_task_cost_usd >= prisma.config.json.orchestration.max_cost_per_task_usd
+         (V5.0 — Per-Task Cost Circuit Breaker: this task alone has burned its budget,
+          regardless of iteration_count. §8.4's Stagnation Detection catches loops that
+          aren't converging on SCORE; this catches loops that are converging too slowly
+          relative to COST — e.g. large context re-sent every iteration in sequential_hats
+          mode. Session-wide budget alerts (000_Kernel_System_Override.md, Watcher metrics)
+          are a backstop for the whole session; this is a backstop for one runaway task.
+          Track current_task_cost_usd the same way as current_task_iteration_scores (§9.1):
+          working memory scoped to the active task, reset when it completes.)
 
 ┌─────────────────────────────────────────────────────────────┐
 │              🔄 FRESH EYES PROTOCOL                          │
@@ -544,6 +553,11 @@ across iterations; `learnings.json.stagnation_aborts` (§9.2) is written only on
 
 #### Detection Algorithm
 
+**Calibração:** o limiar `0.3` abaixo é um ponto de partida declarado, não medido — não existe
+ainda um histórico real de `current_task_iteration_scores` (§9.1) grande o suficiente para saber
+se 0.3 separa bem "progredindo devagar" de "estagnado". Recalibrar após acumular dados reais de
+sessões via `learnings.json.stagnation_aborts`. Ver `docs/29_Methodology_Gaps_Implementation_Plan.md` Sprint C2.
+
 ```
 AFTER each Auditor verdict (iteration i ≥ 2):
 
@@ -635,6 +649,11 @@ interface OrchestratorState {
   // is the live array §8.4 reads DURING the loop to decide whether to detect it.
   current_task_iteration_scores: number[];              // [score_iter0, score_iter1, ...]
   current_task_violation_categories: (string | null)[]; // Primary violation category per iteration
+  current_task_cost_usd: number;                        // V5.0 — running spend for the active
+                                                          // task only; compared against
+                                                          // orchestration.max_cost_per_task_usd
+                                                          // (§8.2 Per-Task Cost Circuit Breaker).
+                                                          // Reset to 0 when the task completes.
 
   // Active Hat (solo mode only)
   active_hat: AgentRole | null;
@@ -671,6 +690,14 @@ interface LearningsState {
     rule: string;
     count: number;
     last_seen: string;
+    source: "audit_time" | "production";  // V5.0 — "audit_time" = the Auditor caught it
+                                            // itself (all entries before this field existed
+                                            // are implicitly this). "production" = only a
+                                            // real PRODUCTION_INCIDENT_LINKED event (PMP §3.15)
+                                            // revealed it — the Auditor's own checklist missed
+                                            // it. See docs/29_Methodology_Gaps_Implementation_Plan.md
+                                            // Sprint C1 — this is the field that lets the system
+                                            // tell the difference between the two.
   }>;
 
   // Agent performance

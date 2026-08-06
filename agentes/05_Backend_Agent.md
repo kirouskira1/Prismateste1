@@ -79,29 +79,69 @@ const decision = await consultPolicyAgent({
 });
 ```
 
-### 3.3 The Rule Detector (When to Delegate?)
+### 3.3 The Rule Detector (Where Does This Logic Live?)
 
 ```
 The logic I'm implementing...
 
-  ├── Contains business numeric values?
-  │     (limits, rates, percentages, deadlines)
-  │     └── YES → DELEGATE to Policy Agent
+  ├── Is a basic CRUD without business rules, or technical auth/authz?
+  │     └── YES → (a) Implement directly in code
   │
-  ├── Involves permission/approval decisions?
-  │     (can do X?, approve order?, create resource?)
-  │     └── YES → DELEGATE to Policy Agent
+  ├── Contains a business value (limit, rate, %, deadline), a
+  │     permission/approval decision, or a rule that varies by
+  │     client/context?
+  │     └── NO → (a) Implement directly in code
   │
-  ├── Changes based on client/context?
-  │     (different rules per company, plan, region)
-  │     └── YES → DELEGATE to Policy Agent
+  ├── Is the rule STATIC — fixed by design, would only ever change
+  │     via a code change + redeploy anyway (no one will ever ask to
+  │     tune this live)?
+  │     └── YES → (a) Implement directly in code
   │
-  ├── Is a basic CRUD without business rules?
-  │     └── NO → Implement directly
+  ├── Is it VOLATILE but a SINGLE simple value — a threshold, rate,
+  │     limit, or deadline — applied by direct comparison, with NO
+  │     textual/contextual judgment needed?
+  │     └── YES → (b) LOOKUP in `business_config` table
   │
-  └── Is technical auth/authz?
-        └── NO → Implement directly
+  └── Does applying it require interpreting MULTIPLE conditions
+        written in natural language, or contextual/qualitative
+        judgment?
+        └── YES → (c) DELEGATE to Policy Agent
 ```
+
+**Why three outcomes, not two:** being business-related and volatile is not, by itself, a reason to pay for a RAG lookup + LLM call at decision time. Outcome (c) is reserved for rules that require *reading and interpreting text*. Outcome (b) exists for the far more common case — a number someone wants to change from a dashboard without a redeploy, but with no surrounding judgment involved.
+
+#### Contrasting Example: (b) `business_config` vs. (c) Policy Agent
+
+Both rules below are volatile — Ops can change the $1000 figure, and the trainer can rewrite the progression methodology — but only one requires reading free text to apply.
+
+```typescript
+// ✅ (b) business_config: volatile threshold, applied by direct comparison.
+// No RAG, no LLM call — just a row lookup. maybeSingle() + a default: the key
+// may not be configured yet for a given project, and that must not throw.
+const { data: config } = await supabase
+  .from("business_config")
+  .select("value")
+  .eq("project_config_id", projectConfigId)
+  .eq("key", "manual_approval_order_threshold_usd")
+  .maybeSingle();
+
+const threshold = Number(config?.value ?? DEFAULT_MANUAL_APPROVAL_THRESHOLD_USD);
+if (orderTotal > threshold) {
+  await flagForManualApproval(orderId); // "orders over $1000 need manual approval"
+}
+```
+
+```typescript
+// ✅ (c) Policy Agent: compound textual rule — see 11_Golden_Sample_FitPro.md
+// (for Intermediate-level students: "Easy"/"Very Easy" for 2 consecutive
+// sessions AND no reported joint pain → +5%)
+const decision = await consultPolicyAgent({
+  agentName: "workout_progression_policy",
+  context: { currentFeedback, studentHistory },
+});
+```
+
+The question is never "is this a business value" alone — it's whether applying the rule is a single comparison against a stored number (→ `business_config`) or requires weighing multiple natural-language conditions (→ Policy Agent).
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Classification:** MASTER INDEX  
 **Version:** V5.0  
-**Total Canonical Documents:** 47 files (11 `agentes/` + 33 `docs/` + 3 `docs/skills/`) — recounted directly against disk, see `docs/26_Version_Unification_Plan.md`  
+**Total Canonical Documents:** 48 files (11 `agentes/` + 34 `docs/` + 3 `docs/skills/`) — recounted directly against disk, see `docs/26_Version_Unification_Plan.md`  
 **Language:** EN-US  
 **Status:** All canonical, Adaptive-informed, Access-List enforced, Fable-hardened, Harness-enhanced  
 
@@ -73,7 +73,8 @@
 | 25 | `25_Headless_CI_Spec.md` | `Headless_CI` | Bootstrap script, headless runner, Version Consistency Gate, GitHub Actions workflow |
 | 26 | `26_Version_Unification_Plan.md` | `Version_Unification` | Changelog completo da migração de versionamento V4.x → V5.0 |
 | 27 | `27_Tool_Compatibility_Matrix.md` | `Tool_Compatibility` | Mapa canônico de ferramentas Antigravity ↔ Claude Code, detecção de ambiente de 3 vias, Claude Code Boot Adapter |
-| 28 | `28_LangGraph_Feasibility_Analysis.md` | `LangGraph_Feasibility` | Análise crítica: viabilidade, valor real e portabilidade de stack do orquestrador LangGraph (doc 06) antes de implementar |
+| 28 | `28_LangGraph_Feasibility_Analysis.md` | `LangGraph_Feasibility` | Análise crítica: viabilidade/valor/portabilidade do LangGraph; + organização de docs por modo, renomear compilation_target, heurística Policy Agent, gaps de metodologia |
+| 29 | `29_Methodology_Gaps_Implementation_Plan.md` | `Methodology_Gaps_Plan` | Plano de implementação dos gaps do doc 28 usando a metodologia Prisma (Dynamic Rubric, Task Type Router); protocolo novo Coordinated Sprint Group; log real de um teste do loop TRM via subagentes |
 
 ---
 
